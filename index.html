@@ -142,7 +142,7 @@
             color: var(--text-main);
             font-weight: 700;
             text-align: center;
-            white-space: utf-8;
+            white-space: nowrap;
         }
 
         .time-col {
@@ -184,14 +184,36 @@
         .tag {
             background-color: var(--primary-light);
             color: var(--primary);
-            padding: 4px 8px;
+            padding: 5px 10px;
             border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
-            display: inline-block;
-            word-break: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
             width: 100%;
             box-sizing: border-box;
+            word-break: break-word;
+        }
+
+        .tag span {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 0 2px;
+        }
+
+        .tag button:hover {
+            color: #b91c1c;
         }
 
         .instructions {
@@ -213,38 +235,11 @@
         </header>
 
         <div class="instructions">
-            💡 Dica: Clique em qualquer horário disponível na tabela abaixo para preencher o seu nome ou o da sua célula/grupo. Os meses futuros são liberados automaticamente após o término do mês anterior.
+            💡 Dica: Clique em qualquer horário na tabela para se inscrever. Caso tenha imprevistos, você pode remover ou editar sua inscrição clicando no "X" ao lado do seu nome.
         </div>
         
         <!-- Navegação de Meses 2026 / 2027 -->
         <div class="months-nav" id="monthsNav">
-            <button class="month-btn active" id="btn-jan-2026" onclick="showMonth('jan-2026', this)">Jan 2026</button>
-            <button class="month-btn" id="btn-fev-2026" onclick="showMonth('fev-2026', this)">Fev 2026</button>
-            <button class="month-btn" id="btn-mar-2026" onclick="showMonth('mar-2026', this)">Mar 2026</button>
-            <button class="month-btn" id="btn-abr-2026" onclick="showMonth('abr-2026', this)">Abr 2026</button>
-            <button class="month-btn" id="btn-mai-2026" onclick="showMonth('mai-2026', this)">Mai 2026</button>
-            <button class="month-btn" id="btn-jun-2026" onclick="showMonth('jun-2026', this)">Jun 2026</button>
-            <button class="month-btn" id="btn-jul-2026" onclick="showMonth('jul-2026', this)">Jul 2026</button>
-            <button class="month-btn" id="btn-ago-2026" onclick="showMonth('ago-2026', this)">Ago 2026</button>
-            <button class="month-btn" id="btn-set-2026" onclick="showMonth('set-2026', this)">Set 2026</button>
-            <button class="month-btn" id="btn-out-2026" onclick="showMonth('out-2026', this)">Out 2026</button>
-            <button class="month-btn" id="btn-nov-2026" onclick="showMonth('nov-2026', this)">Nov 2026</button>
-            <button class="month-btn" id="btn-dez-2026" onclick="showMonth('dez-2026', this)">Dez 2026</button>
-            <button class="month-btn" id="btn-jan-2027" onclick="showMonth('jan-2027', this)">Jan 2027</button>
-            <button class="month-btn" id="btn-fev-2027" onclick="showMonth('fev-2027', this)">Fev 2027</button>
-            <button class="month-btn" id="btn-mar-2027" onclick="showMonth('mar-2027', this)">Mar 2027</button>
-            <button class="month-btn" id="btn-abr-2027" onclick="showMonth('abr-2027', this)">Abr 2027</button>
-            <button class="month-btn" id="btn-mai-2027" onclick="showMonth('mai-2027', this)">Mai 2027</button>
-            <button class="month-btn" id="btn-jun-2027" onclick="showMonth('jun-2027', this)">Jun 2027</button>
-            <button class="month-btn" id="btn-jul-2027" onclick="showMonth('jul-2027', this)">Jul 2027</button>
-            <button class="month-btn" id="btn-ago-2027" onclick="showMonth('ago-2027', this)">Ago 2027</button>
-            <button class="month-btn" id="btn-set-2027" onclick="showMonth('set-2027', this)">Set 2027</button>
-            <button class="month-btn" id="btn-out-2027" onclick="showMonth('out-2027', this)">Out 2027</button>
-            <button class="month-btn" id="btn-nov-2027" onclick="showMonth('nov-2027', this)">Nov 2027</button>
-            <button class="month-btn" id="btn-dez-2027" onclick="showMonth('dez-2027', this)">Dez 2027</button>
-        </div>
-
-        <div id="contentContainer">
             <script>
                 const meses = [
                     { id: 'jan-2026', nome: 'Janeiro de 2026', ano: 2026, mesIndex: 0 }, 
@@ -273,6 +268,14 @@
                     { id: 'dez-2027', nome: 'Dezembro de 2027', ano: 2027, mesIndex: 11 }
                 ];
 
+                document.write(meses.map((m, index) => `
+                    <button class="month-btn ${index === 0 ? 'active' : ''}" id="btn-${m.id}" onclick="showMonth('${m.id}', this)">${m.nome.split(' ')[0]} ${m.ano}</button>
+                `).join(''));
+            </script>
+        </div>
+
+        <div id="contentContainer">
+            <script>
                 const diasSemana = [
                     "Segunda (Início 19h)", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo", "Segunda (Término 19h)"
                 ];
@@ -306,7 +309,7 @@
                                 <tbody>
                                     ${horarios.map(h => `
                                         <tr class="${h.vigilia ? 'vigilia-row' : ''}">
-                                            <td class="time-col">${h.t}</td>${diasSemana.map(() => `<td class="slot-cell" onclick="addParticipant(this)"><div class="participant-tags"></div></td>`).join('')}
+                                            <td class="time-col">${h.t}</td>${diasSemana.map(() => `<td class="slot-cell" onclick="handleCellClick(event, this)"><div class="participant-tags"></div></td>`).join('')}
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -319,20 +322,17 @@
     </div>
 
     <script>
-        // Lógica para bloquear/desbloquear meses com base na data atual
         function atualizarBloqueioMeses() {
             const agora = new Date();
             const anoAtual = agora.getFullYear();
-            const mesAtual = agora.getMonth(); // 0 a 11
+            const mesAtual = agora.getMonth();
 
             meses.forEach((m) => {
                 let btn = document.getElementById(`btn-${m.id}`);
                 if (!btn) return;
 
-                // Regra: Um mês é liberado se o ano/mês atual for maior ou igual ao mês da escala
                 let liberado = (m.ano < anoAtual) || (m.ano === anoAtual && m.mesIndex <= mesAtual);
 
-                // Permitir também acessar se já houver dados salvos nele
                 let dadosSalvos = localStorage.getItem('adoracao_escala_v4');
                 if (dadosSalvos) {
                     let parsed = JSON.parse(dadosSalvos);
@@ -370,17 +370,38 @@
             btnElement.classList.add('active');
         }
 
-        function addParticipant(cell) {
+        function handleCellClick(event, cell) {
+            // Se clicou diretamente no botão de excluir (X), não abre o prompt de inclusão
+            if (event.target.tagName === 'BUTTON') return;
+
             let container = cell.querySelector('.participant-tags');
-            let nome = prompt("Digite seu nome ou o da sua célula/grupo para este horário:");
+            let nome = prompt("Deseja adicionar seu nome ou célula a este horário:");
             
             if (nome && nome.trim() !== "") {
-                let tag = document.createElement('div');
-                tag.className = 'tag';
-                tag.innerText = nome.trim();
-                container.appendChild(tag);
+                adicionarTag(container, nome.trim());
                 saveData();
             }
+        }
+
+        function adicionarTag(container, texto) {
+            let tag = document.createElement('div');
+            tag.className = 'tag';
+
+            let span = document.createElement('span');
+            span.innerText = texto;
+
+            let btnRemover = document.createElement('button');
+            btnRemover.innerText = '×';
+            btnRemover.title = 'Remover / Cancelar';
+            btnRemover.onclick = function(e) {
+                e.stopPropagation(); // Evita reabrir o prompt
+                tag.remove();
+                saveData();
+            };
+
+            tag.appendChild(span);
+            tag.appendChild(btnRemover);
+            container.appendChild(tag);
         }
 
         function saveData() {
@@ -392,7 +413,7 @@
                     let rData = [];
                     row.querySelectorAll('.participant-tags').forEach(container => {
                         let tags = [];
-                        container.querySelectorAll('.tag').forEach(t => tags.push(t.innerText));
+                        container.querySelectorAll('.tag span').forEach(span => tags.push(span.innerText));
                         rData.push(tags);
                     });
                     rowsData.push(rData);
@@ -417,10 +438,7 @@
                                     if (containers[cIdx]) {
                                         containers[cIdx].innerHTML = '';
                                         tagsArray.forEach(tagName => {
-                                            let tag = document.createElement('div');
-                                            tag.className = 'tag';
-                                            tag.innerText = tagName;
-                                            containers[cIdx].appendChild(tag);
+                                            adicionarTag(containers[cIdx], tagName);
                                         });
                                     }
                                 });
