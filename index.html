@@ -150,7 +150,7 @@
             white-space: nowrap;
         }
 
-        /* Estilo discreto para o contador de vagas no topo */
+        /* Estilo discreto para o contador de horários disponíveis no topo */
         .vagas-counter {
             display: block;
             font-size: 11px;
@@ -246,11 +246,11 @@
 <body>
     <div class="container">
         <header>
-            <h1>Missão Guarulhos</h1>
+            <h1>Missão Guarulhos - Adoração Ininterrupta</h1>
         </header>
 
         <div class="instructions">
-            💡 Dica: Clique em qualquer horário na tabela para se inscrever. Cada usuário só consegue gerenciar (remover) os horários que ele mesmo cadastrou.
+            💡 Dica: Clique em qualquer horário na tabela para preencher.
         </div>
         
         <!-- Navegação de Meses -->
@@ -321,7 +321,7 @@
                                         ${diasSemana.map((d, cIdx) => `
                                             <th>
                                                 ${d}
-                                                <span class="vagas-counter" id="vagas-${m.id}-${cIdx}">... vagas</span>
+                                                <span class="vagas-counter" id="vagas-${m.id}-${cIdx}">... horários disponíveis</span>
                                             </th>
                                         `).join('')}
                                     </tr>
@@ -378,7 +378,6 @@
             meses.forEach(m => {
                 let mesData = cacheDados[m.id] || {};
                 
-                // Controladores de vagas por coluna (dia)
                 let totalHorarios = horarios.length;
                 let preenchidosPorColuna = {};
 
@@ -422,12 +421,12 @@
                     });
                 });
 
-                // Atualiza os contadores de vagas na tela
+                // Atualiza os contadores com o texto "horários disponíveis"
                 diasSemana.forEach((_, cIdx) => {
                     let spanVagas = document.getElementById(`vagas-${m.id}-${cIdx}`);
                     if (spanVagas) {
-                        let vagasVagas = totalHorarios - preenchidosPorColuna[cIdx];
-                        spanVagas.innerText = `${vagasVagas} vaga${vagasVagas === 1 ? '' : 's'} vago${vagasVagas === 1 ? '' : 's'}`;
+                        let horariosDisponiveis = totalHorarios - preenchidosPorColuna[cIdx];
+                        spanVagas.innerText = `${horariosDisponiveis} horári${horariosDisponiveis === 1 ? 'o disponível' : 'os disponíveis'}`;
                     }
                 });
             });
