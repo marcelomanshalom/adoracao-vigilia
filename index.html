@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoração Ininterrupta - Missão Guarulhos</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --border: #cbd5e1;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --filled-bg: #ecfdf5;
+            --filled-text: #065f46;
+            --filled-border: #a7f3d0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 15px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 26px;
+            color: var(--text-main);
+            margin: 0 0 6px 0;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Navegação por Meses */
+        .months-nav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .month-btn {
+            background-color: #f1f5f9;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .month-btn:hover {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .month-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Seções de Conteúdo */
+        .month-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .month-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--text-main);
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .time-col {
+            font-weight: 600;
+            color: var(--primary);
+            background-color: #f8fafc;
+            text-align: center;
+            white-space: nowrap;
+            width: 130px;
+        }
+
+        .slot-cell {
+            cursor: pointer;
+            transition: background-color 0.15s;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .slot-cell:hover {
+            background-color: #f1f5f9;
+        }
+
+        .slot-cell.filled {
+            background-color: var(--filled-bg);
+            color: var(--filled-text);
+            font-weight: 600;
+        }
+
+        .instructions {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Adoração Ininterrupta</h1>
+            <div class="subtitle">Missão Guarulhos • Escala de Compromissos</div>
+        </header>
+
+        <div class="instructions">
+            💡 Dica: Clique em qualquer horário disponível na tabela abaixo para preencher o seu nome ou o da sua célula/pastoreio.
+        </div>
+        
+        <div class="months-nav" id="monthsNav">
+            <button class="month-btn active" onclick="showMonth('setembro', this)">Setembro</button>
+            <button class="month-btn" onclick="showMonth('outubro', this)">Outubro</button>
+        </div>
+
+        <div id="contentContainer">
+            <!-- SETEMBRO -->
+            <div id="setembro" class="month-section active">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>HORÁRIO</th>
+                                <th>DIA 21/09<br>SEGUNDA</th>
+                                <th>DIA 22/09<br>TERÇA</th>
+                                <th>DIA 23/09<br>QUARTA</th>
+                                <th>DIA 24/09<br>QUINTA</th>
+                                <th>DIA 25/09<br>SEXTA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="time-col">02:00 as 03:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">CV</td><td class="slot-cell filled" onclick="editSlot(this)">P1 e D1</td><td class="slot-cell filled" onclick="editSlot(this)">T2 / T3</td><td class="slot-cell filled" onclick="editSlot(this)">T4/T5</td></tr>
+                            <tr><td class="time-col">03:00 as 04:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">CV</td><td class="slot-cell filled" onclick="editSlot(this)">P1 e D1</td><td class="slot-cell filled" onclick="editSlot(this)">T2 / T3</td><td class="slot-cell filled" onclick="editSlot(this)">T4/T5</td></tr>
+                            <tr><td class="time-col">04:00 as 05:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">CV</td><td class="slot-cell filled" onclick="editSlot(this)">P1 e D1</td><td class="slot-cell filled" onclick="editSlot(this)">T2 / T3</td><td class="slot-cell filled" onclick="editSlot(this)">T4/T5</td></tr>
+                            <tr><td class="time-col">05:00 as 06:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">CV</td><td class="slot-cell filled" onclick="editSlot(this)">P1 e D1</td><td class="slot-cell filled" onclick="editSlot(this)">T2 / T3</td><td class="slot-cell filled" onclick="editSlot(this)">T4/T5</td></tr>
+                            <tr><td class="time-col">06:00 as 07:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Silmara</td><td class="slot-cell filled" onclick="editSlot(this)">João M</td></tr>
+                            <tr><td class="time-col">07:00 as 08:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Silmara</td><td class="slot-cell filled" onclick="editSlot(this)">João M</td></tr>
+                            <tr><td class="time-col">08:00 as 09:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Felipe P2</td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilânio / Silmara</td><td class="slot-cell" onclick="editSlot(this)"></td></tr>
+                            <tr><td class="time-col">09:00 as 10:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Felipe P2</td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilânio / Silmara</td><td class="slot-cell filled" onclick="editSlot(this)">Felipe P2/João</td></tr>
+                            <tr><td class="time-col">10:00 as 11:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilanio / Silmara</td><td class="slot-cell filled" onclick="editSlot(this)">Felipe P2/João</td></tr>
+                            <tr><td class="time-col">11:00 as 12:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilânio / Silmara</td><td class="slot-cell filled" onclick="editSlot(this)">Felipe P2</td></tr>
+                            <tr><td class="time-col">12:00 as 13:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Silmara</td><td class="slot-cell" onclick="editSlot(this)"></td></tr>
+                            <tr><td class="time-col">13:00 as 14:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Silmara Mônica</td><td class="slot-cell filled" onclick="editSlot(this)">Felipe P2</td></tr>
+                            <tr><td class="time-col">14:00 as 15:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilânio</td><td class="slot-cell filled" onclick="editSlot(this)">Christian / Felipe P2</td></tr>
+                            <tr><td class="time-col">15:00 as 16:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilânio</td><td class="slot-cell filled" onclick="editSlot(this)">Christian / Felipe P2</td></tr>
+                            <tr><td class="time-col">16:00 as 17:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilânio</td><td class="slot-cell filled" onclick="editSlot(this)">Felipe P2</td></tr>
+                            <tr><td class="time-col">17:00 as 18:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Sheila</td><td class="slot-cell filled" onclick="editSlot(this)">Edilânio / Sofia</td><td class="slot-cell" onclick="editSlot(this)"></td></tr>
+                            <tr><td class="time-col">18:00 as 19:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Sofia</td><td class="slot-cell" onclick="editSlot(this)"></td></tr>
+                            <tr><td class="time-col">19:00 as 20:00</td><td class="slot-cell filled" onclick="editSlot(this)">MISSA</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Kat P2</td></tr>
+                            <tr><td class="time-col">20:00 as 21:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Lucas / El Shaddai</td><td class="slot-cell filled" onclick="editSlot(this)">Lucas / El Shaddai</td><td class="slot-cell filled" onclick="editSlot(this)">Lucas / El Shaddai</td></tr>
+                            <tr><td class="time-col">21:00 as 22:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Lucas / El Shaddai</td></tr>
+                            <tr><td class="time-col">22:00 as 23:00</td><td class="slot-cell filled" onclick="editSlot(this)">CONSELHO</td><td class="slot-cell filled" onclick="editSlot(this)">VOCACIONAL</td><td class="slot-cell filled" onclick="editSlot(this)">P2/ D2 e T1</td><td class="slot-cell filled" onclick="editSlot(this)">T6 - T9</td><td class="slot-cell filled" onclick="editSlot(this)">DEF1 - DEF2</td></tr>
+                            <tr><td class="time-col">23:00 as 00:00</td><td class="slot-cell filled" onclick="editSlot(this)">CONSELHO</td><td class="slot-cell filled" onclick="editSlot(this)">VOCACIONAL</td><td class="slot-cell filled" onclick="editSlot(this)">P2/ D2 e T1</td><td class="slot-cell filled" onclick="editSlot(this)">T6 - T9</td><td class="slot-cell filled" onclick="editSlot(this)">DEF1 - DEF2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- OUTUBRO -->
+            <div id="outubro" class="month-section">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>HORÁRIO</th>
+                                <th>26/10 SEGUNDA</th>
+                                <th>27/10 TERÇA</th>
+                                <th>28/10 QUARTA</th>
+                                <th>29/10 QUINTA</th>
+                                <th>30/10 SEXTA</th>
+                                <th>31/10 SÁBADO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="time-col">02:00 as 03:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">VOCACIONAL</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td></tr>
+                            <tr><td class="time-col">03:00 as 04:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">VOCACIONAL</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td></tr>
+                            <tr><td class="time-col">12:00 as 13:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Josefa - GO Emmanuel</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td></tr>
+                            <tr><td class="time-col">13:00 as 14:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Nicole</td></tr>
+                            <tr><td class="time-col">16:00 as 17:00</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Nicole</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell filled" onclick="editSlot(this)">Nicole</td><td class="slot-cell" onclick="editSlot(this)"></td></tr>
+                            <tr><td class="time-col">19:00 as 20:00</td><td class="slot-cell filled" onclick="editSlot(this)">MISSA</td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td><td class="slot-cell" onclick="editSlot(this)"></td></tr>
+                            <tr><td class="time-col">22:00 as 23:00</td><td class="slot-cell filled" onclick="editSlot(this)">CONSELHO</td><td class="slot-cell filled" onclick="editSlot(this)">CV</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td><td class="slot-cell filled" onclick="editSlot(this)">CÉLULAS</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showMonth(monthId, btnElement) {
+            document.querySelectorAll('.month-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(monthId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        function editSlot(cell) {
+            let currentName = cell.innerText.trim();
+            let newName = prompt("Digite seu nome ou sua célula para este horário:", currentName);
+            
+            if (newName !== null) {
+                cell.innerText = newName.trim();
+                if (newName.trim() !== "") {
+                    cell.classList.add('filled');
+                } else {
+                    cell.classList.remove('filled');
+                }
+                saveData();
+            }
+        }
+
+        // Salvar alterações localmente no navegador
+        function saveData() {
+            let data = {};
+            document.querySelectorAll('.month-section').forEach(sec => {
+                let id = sec.id;
+                data[id] = [];
+                sec.querySelectorAll('tbody tr').forEach(row => {
+                    let rowData = [];
+                    row.querySelectorAll('td').forEach((td, idx) => {
+                        if(idx > 0) rowData.push(td.innerText);
+                    });
+                    data[id].push(rowData);
+                });
+            });
+            localStorage.setItem('adoracao_escala', JSON.stringify(data));
+        }
+
+        // Carregar dados salvos ao abrir o site
+        window.onload = function() {
+            let saved = localStorage.getItem('adoracao_escala');
+            if (saved) {
+                let data = JSON.parse(saved);
+                for (let monthId in data) {
+                    let sec = document.getElementById(monthId);
+                    if (sec) {
+                        let rows = sec.querySelectorAll('tbody tr');
+                        data[monthId].forEach((rowData, rIdx) => {
+                            if (rows[rIdx]) {
+                                let tds = rows[rIdx].querySelectorAll('td');
+                                rowData.forEach((val, cIdx) => {
+                                    if (tds[cIdx + 1]) {
+                                        tds[cIdx + 1].innerText = val;
+                                        if (val.trim() !== "") {
+                                            tds[cIdx + 1].classList.add('filled');
+                                        } else {
+                                            tds[cIdx + 1].classList.remove('filled');
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
