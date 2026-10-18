@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adoração Ininterrupta - Missão Guarulhos</title>
+    
+    <!-- Firebase SDK (Google Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --primary: #4f46e5;
@@ -235,10 +240,10 @@
         </header>
 
         <div class="instructions">
-            💡 Dica: Clique em qualquer horário na tabela para se inscrever. Caso tenha imprevistos, você pode remover ou editar sua inscrição clicando no "X" ao lado do seu nome.
+            💡 Dica: Clique em qualquer horário na tabela para se inscrever. Cada usuário só consegue gerenciar (remover) os horários que ele mesmo cadastrou.
         </div>
         
-        <!-- Navegação de Meses 2026 / 2027 -->
+        <!-- Navegação de Meses -->
         <div class="months-nav" id="monthsNav">
             <script>
                 const meses = [
@@ -307,9 +312,13 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${horarios.map(h => `
+                                    ${horarios.map((h, rIdx) => `
                                         <tr class="${h.vigilia ? 'vigilia-row' : ''}">
-                                            <td class="time-col">${h.t}</td>${diasSemana.map(() => `<td class="slot-cell" onclick="handleCellClick(event, this)"><div class="participant-tags"></div></td>`).join('')}
+                                            <td class="time-col">${h.t}</td>${diasSemana.map((_, cIdx) => `
+                                                <td class="slot-cell" onclick="handleCellClick(event, '${m.id}', ${rIdx}, ${cIdx})">
+                                                    <div class="participant-tags" id="cell-${m.id}-${rIdx}-${cIdx}"></div>
+                                                </td>
+                                            `).join('')}
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -322,6 +331,114 @@
     </div>
 
     <script>
+        // CONFIGURAÇÃO DO FIREBASE (Banco de dados em nuvem gratuito)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY_AQUI",
+            authDomain: "seu-projeto.firebaseapp.com",
+            projectId: "seu-projeto",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123:web:abc"
+        };
+        // Nota: Para testes rápidos funcionar sem criar conta própria, você pode usar uma instância de teste ou configurar seu projeto no console do Firebase.
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Identificador único do navegador para controlar permissões de exclusão
+        let meuIdUsuario = localStorage.getItem('missao_gru_userid');
+        if (!meuIdUsuario) {
+            meuIdUsuario = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('missao_gru_userid', meuIdUsuario);
+        }
+
+        let cacheDados = {};
+
+        // Escuta em tempo real as mudanças no banco de dados
+        db.collection("escala_adoracao").doc("dados_completos").onSnapshot((doc) => {
+            if (doc.exists) {
+                cacheDados = doc.data() || {};
+                renderizarDados();
+            }
+        });
+
+        function renderizarDados() {
+            meses.forEach(m => {
+                let mesData = cacheDados[m.id] || {};
+                horarios.forEach((_, rIdx) => {
+                    diasSemana.forEach((_, cIdx) => {
+                        let container = document.getElementById(`cell-${m.id}-${rIdx}-${cIdx}`);
+                        if (!container) return;
+                        
+                        container.innerHTML = '';
+                        let key = `${rIdx}_${cIdx}`;
+                        let itens = mesData[key] || [];
+
+                        itens.forEach(item => {
+                            let tag = document.createElement('div');
+                            tag.className = 'tag';
+
+                            let span = document.createElement('span');
+                            span.innerText = item.texto;
+
+                            tag.appendChild(span);
+
+                            // Permite remover/mudar APENAS se o usuário atual foi quem criou a tag
+                            if (item.autor === meuIdUsuario) {
+                                let btnRemover = document.createElement('button');
+                                btnRemover.innerText = '×';
+                                btnRemover.title = 'Remover meu agendamento';
+                                btnRemover.onclick = function(e) {
+                                    e.stopPropagation();
+                                    removerItem(m.id, rIdx, cIdx, item.id);
+                                };
+                                tag.appendChild(btnRemover);
+                            }
+
+                            container.appendChild(tag);
+                        });
+                    });
+                });
+            });
+            atualizarBloqueioMeses();
+        }
+
+        function handleCellClick(event, monthId, rIdx, cIdx) {
+            if (event.target.tagName === 'BUTTON') return;
+
+            let nome = prompt("Digite seu nome ou o da sua célula/grupo para este horário:");
+            if (nome && nome.trim() !== "") {
+                if (!cacheDados[monthId]) cacheDados[monthId] = {};
+                let key = `${rIdx}_${cIdx}`;
+                if (!cacheDados[monthId][key]) cacheDados[monthId][key] = [];
+
+                // Adiciona com o ID do autor atual
+                cacheDados[monthId][key].push({
+                    id: 'item_' + Math.random().toString(36).substr(2, 9),
+                    texto: nome.trim(),
+                    autor: meuIdUsuario
+                });
+
+                salvarNoFirebase();
+            }
+        }
+
+        function removerItem(monthId, rIdx, cIdx, itemId) {
+            let key = `${rIdx}_${cIdx}`;
+            if (cacheDados[monthId] && cacheDados[monthId][key]) {
+                cacheDados[monthId][key] = cacheDados[monthId][key].filter(item => item.id !== itemId);
+                salvarNoFirebase();
+            }
+        }
+
+        function salvarNoFirebase() {
+            db.collection("escala_adoracao").doc("dados_completos").set(cacheDados)
+              .catch((error) => {
+                  console.error("Erro ao salvar no banco de dados: ", error);
+                  alert("Erro ao sincronizar. Verifique a conexão.");
+              });
+        }
+
         function atualizarBloqueioMeses() {
             const agora = new Date();
             const anoAtual = agora.getFullYear();
@@ -332,16 +449,10 @@
                 if (!btn) return;
 
                 let liberado = (m.ano < anoAtual) || (m.ano === anoAtual && m.mesIndex <= mesAtual);
+                let mesData = cacheDados[m.id] || {};
+                let temPreenchimento = Object.keys(mesData).some(k => mesData[k] && mesData[k].length > 0);
 
-                let dadosSalvos = localStorage.getItem('adoracao_escala_v4');
-                if (dadosSalvos) {
-                    let parsed = JSON.parse(dadosSalvos);
-                    if (parsed[m.id] && temPreenchimento(parsed[m.id])) {
-                        liberado = true;
-                    }
-                }
-
-                if (liberado) {
+                if (liberado || temPreenchimento) {
                     btn.disabled = false;
                     btn.innerText = m.nome.split(' ')[0] + ' ' + m.ano;
                 } else {
@@ -349,11 +460,6 @@
                     btn.innerText = '🔒 ' + m.nome.split(' ')[0] + ' ' + m.ano;
                 }
             });
-        }
-
-        function temPreenchimento(mesData) {
-            if (!mesData || !mesData.rowsData) return false;
-            return mesData.rowsData.some(row => row.some(tags => tags.length > 0));
         }
 
         function showMonth(monthId, btnElement) {
@@ -370,83 +476,7 @@
             btnElement.classList.add('active');
         }
 
-        function handleCellClick(event, cell) {
-            // Se clicou diretamente no botão de excluir (X), não abre o prompt de inclusão
-            if (event.target.tagName === 'BUTTON') return;
-
-            let container = cell.querySelector('.participant-tags');
-            let nome = prompt("Deseja adicionar seu nome ou célula a este horário:");
-            
-            if (nome && nome.trim() !== "") {
-                adicionarTag(container, nome.trim());
-                saveData();
-            }
-        }
-
-        function adicionarTag(container, texto) {
-            let tag = document.createElement('div');
-            tag.className = 'tag';
-
-            let span = document.createElement('span');
-            span.innerText = texto;
-
-            let btnRemover = document.createElement('button');
-            btnRemover.innerText = '×';
-            btnRemover.title = 'Remover / Cancelar';
-            btnRemover.onclick = function(e) {
-                e.stopPropagation(); // Evita reabrir o prompt
-                tag.remove();
-                saveData();
-            };
-
-            tag.appendChild(span);
-            tag.appendChild(btnRemover);
-            container.appendChild(tag);
-        }
-
-        function saveData() {
-            let data = {};
-            document.querySelectorAll('.month-section').forEach(sec => {
-                let id = sec.id;
-                let rowsData = [];
-                sec.querySelectorAll('tbody tr').forEach(row => {
-                    let rData = [];
-                    row.querySelectorAll('.participant-tags').forEach(container => {
-                        let tags = [];
-                        container.querySelectorAll('.tag span').forEach(span => tags.push(span.innerText));
-                        rData.push(tags);
-                    });
-                    rowsData.push(rData);
-                });
-                data[id] = { rowsData };
-            });
-            localStorage.setItem('adoracao_escala_v4', JSON.stringify(data));
-        }
-
         window.onload = function() {
-            let saved = localStorage.getItem('adoracao_escala_v4');
-            if (saved) {
-                let data = JSON.parse(saved);
-                for (let monthId in data) {
-                    let sec = document.getElementById(monthId);
-                    if (sec) {
-                        let rows = sec.querySelectorAll('tbody tr');
-                        data[monthId].rowsData.forEach((rData, rIdx) => {
-                            if (rows[rIdx]) {
-                                let containers = rows[rIdx].querySelectorAll('.participant-tags');
-                                rData.forEach((tagsArray, cIdx) => {
-                                    if (containers[cIdx]) {
-                                        containers[cIdx].innerHTML = '';
-                                        tagsArray.forEach(tagName => {
-                                            adicionarTag(containers[cIdx], tagName);
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                }
-            }
             atualizarBloqueioMeses();
         };
     </script>
